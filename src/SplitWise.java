@@ -55,12 +55,15 @@ public class SplitWise {
     }
 
     private static void parseAndExecuteExpenseCommand(List<String> commandLine, ExpenseService expenseService) {
-        String loanerId = "";
-        double totalAmount = 0;
-        int numUsers = 0;
+        String loanerId;
+        double totalAmount;
+        int numUsers;
         List<String> loaneeIds = new ArrayList<>();
-        String expenseType = "";
+        String expenseType;
         List<Double> shares = new ArrayList<>();
+        String name = "";
+        String note = "";
+        String imageUri = "";
 
         try {
             loanerId = commandLine.get(1);
@@ -119,8 +122,20 @@ public class SplitWise {
             }
         }
 
+        if (commandLine.size() > 5 + 2 * numUsers) {
+            name = commandLine.get(5 + 2 * numUsers);
+        }
+
+        if (commandLine.size() > 6 + 2 * numUsers) {
+            note = commandLine.get(6 + 2 * numUsers);
+        }
+
+        if (commandLine.size() > 7 + 2 * numUsers) {
+            imageUri = commandLine.get(7 + 2 * numUsers);
+        }
+
         try {
-            expenseService.addExpense(loanerId, totalAmount, loaneeIds, expenseType, shares);
+            expenseService.addExpense(loanerId, totalAmount, loaneeIds, expenseType, shares, name, note, imageUri);
         } catch (IllegalArgumentException ex) {
             System.out.println(ex.getMessage());
         }

@@ -15,7 +15,7 @@ public class ExpenseService {
         this.balanceService = balanceService;
     }
 
-    public void addExpense(String spenderUserId, Double amount, List<String> shareHolders, String type, List<Double> shares) {
+    public void addExpense(String spenderUserId, Double amount, List<String> shareHolders, String type, List<Double> shares, String name, String note, String imageUri) {
         validateUserId(spenderUserId);
         shareHolders.forEach(this::validateUserId);
         Expense.ExpenseType expenseType = getExpenseType(type);
@@ -27,7 +27,7 @@ public class ExpenseService {
         }
         validateShares(expenseType, shares, amount);
         Map<String, Double> amountMap = assignAmountToEachShareHolder(shareHolders, expenseType, amount, shares);
-        Expense expense = new Expense(amount, expenseType, spenderUserId, amountMap);
+        Expense expense = new Expense(amount, name, expenseType, spenderUserId, amountMap, note, imageUri);
         expenses.add(expense);
         for (String userId : shareHolders) {
             if (!userId.equals(spenderUserId)) {
