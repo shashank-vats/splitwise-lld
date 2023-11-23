@@ -1,0 +1,28 @@
+Models:
+
+User
+- userId
+- name
+- email
+- phone
+
+Expense
+- expenseId
+- amount
+- expenseType
+- spender
+- amountMap: map of user to share amount
+
+Services:
+
+UserService
+- Add user
+- get user details
+
+Expense service
+- add expense
+- get expense by userId (optional)
+
+Balance service
+- get balances by user id
+- get all balances
