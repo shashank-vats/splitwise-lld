@@ -62,7 +62,8 @@ public class Expense {
     public enum ExpenseType {
         EQUAL,
         EXACT,
-        PERCENT
+        PERCENT,
+        SHARE
     }
 
 }

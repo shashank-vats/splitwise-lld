@@ -61,6 +61,9 @@ public class ExpenseService {
             case "PERCENT" -> {
                 return Expense.ExpenseType.PERCENT;
             }
+            case "SHARE" -> {
+                return Expense.ExpenseType.SHARE;
+            }
             default -> {
                 throw new IllegalArgumentException("Expense type is not correct");
             }
@@ -99,7 +102,10 @@ public class ExpenseService {
                 return assignEqualAmount(shareHolders, totalAmount);
             }
             case EXACT -> {
-                return assignExact(shareHolders, shares);
+                return assignExactAmount(shareHolders, shares);
+            }
+            case SHARE -> {
+                return assignShareWise(shareHolders, totalAmount, shares);
             }
         }
         throw new RuntimeException();
@@ -123,10 +129,20 @@ public class ExpenseService {
         return balanceMap;
     }
 
-    private Map<String, Double> assignExact(List<String> shareHolders, List<Double> shares) {
+    private Map<String, Double> assignExactAmount(List<String> shareHolders, List<Double> shares) {
         Map<String, Double> balanceMap = new HashMap<>();
         for (int i = 0; i < shareHolders.size(); i++) {
             balanceMap.put(shareHolders.get(i), shares.get(i));
+        }
+        return balanceMap;
+    }
+
+    private Map<String, Double> assignShareWise(List<String> shareHolders, double totalAmount, List<Double> shares) {
+        Map<String, Double> balanceMap = new HashMap<>();
+        Optional<Double> totalShares = shares.stream().reduce(Double::sum);
+        for (int i = 0; i < shareHolders.size(); i++) {
+            double amount = (totalAmount * shares.get(i)) / totalShares.get();
+            balanceMap.put(shareHolders.get(i), amount);
         }
         return balanceMap;
     }
