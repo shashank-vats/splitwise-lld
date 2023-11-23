@@ -1,5 +1,6 @@
 package models;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -15,8 +16,10 @@ public class Expense {
     private final ExpenseType expenseType;
     private final String spenderUserId;
     private final Map<String, Double> amountMap;
+    private final List<Double> shares;
+    private final List<String> shareHolders;
 
-    public Expense(double amount, String name, ExpenseType expenseType, String spenderUserId, Map<String, Double> amountMap, String note, String imageUri) {
+    public Expense(double amount, String name, ExpenseType expenseType, String spenderUserId, Map<String, Double> amountMap, String note, String imageUri, List<Double> shares, List<String> shareHolders) {
         this.expenseId = UUID.randomUUID();
         this.amount = amount;
         this.expenseType = expenseType;
@@ -25,6 +28,8 @@ public class Expense {
         this.name = name;
         this.note = note;
         this.imageUri = imageUri;
+        this.shares = shares;
+        this.shareHolders = shareHolders;
     }
 
     public UUID getExpenseId() {
@@ -57,6 +62,14 @@ public class Expense {
 
     public String getImageUri() {
         return imageUri;
+    }
+
+    public List<Double> getShares() {
+        return shares;
+    }
+
+    public List<String> getShareHolders() {
+        return shareHolders;
     }
 
     public enum ExpenseType {

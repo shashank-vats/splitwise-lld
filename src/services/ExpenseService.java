@@ -27,7 +27,7 @@ public class ExpenseService {
         }
         validateShares(expenseType, shares, amount);
         Map<String, Double> amountMap = assignAmountToEachShareHolder(shareHolders, expenseType, amount, shares);
-        Expense expense = new Expense(amount, name, expenseType, spenderUserId, amountMap, note, imageUri);
+        Expense expense = new Expense(amount, name, expenseType, spenderUserId, amountMap, note, imageUri, shares, shareHolders);
         expenses.add(expense);
         for (String userId : shareHolders) {
             if (!userId.equals(spenderUserId)) {
@@ -72,7 +72,8 @@ public class ExpenseService {
 
     private void validateShares(Expense.ExpenseType expenseType, List<Double> shares, double totalAmount) {
         if (expenseType == Expense.ExpenseType.EQUAL) {
-            if (shares != null && !shares.isEmpty()) throw new IllegalArgumentException("Shares should be empty in case of equal expense type.");
+            if (shares != null && !shares.isEmpty())
+                throw new IllegalArgumentException("Shares should be empty in case of equal expense type.");
             return;
         }
         if (shares == null || shares.isEmpty()) {
@@ -145,5 +146,31 @@ public class ExpenseService {
             balanceMap.put(shareHolders.get(i), amount);
         }
         return balanceMap;
+    }
+
+    public static double getUserOweAmountInExpense(Expense expense, String userId) {
+        double oweAmount = 0;
+        if (userId.equals(expense.getSpenderUserId())) {
+            oweAmount = expense.getAmount();
+        }
+        if (!expense.getAmountMap().containsKey(userId)) return oweAmount;
+        return oweAmount - expense.getAmountMap().get(userId);
+    }
+
+    public List<Expense> getUserExpenses(String userId) {
+        validateUserId(userId);
+        List<Expense> userExpenses = new ArrayList<>();
+        for (Expense expense : expenses) {
+            if (expense.getSpenderUserId().equals(userId)) {
+                userExpenses.add(expense);
+                continue;
+            }
+            for (String shareHolderId : expense.getShareHolders()) {
+                if (shareHolderId.equals(userId)) {
+                    userExpenses.add(expense);
+                }
+            }
+        }
+        return userExpenses;
     }
 }

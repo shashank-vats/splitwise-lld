@@ -1,3 +1,4 @@
+import models.Expense;
 import models.User;
 import services.BalanceService;
 import services.ExpenseService;
@@ -28,11 +29,18 @@ public class SplitWise {
             if (commandLine.isEmpty()) continue;
             String command = commandLine.get(0);
             if (command.equalsIgnoreCase("SHOW")) {
-                System.out.println(commandLine.stream().reduce(SplitWise::joinString));
+                System.out.println(commandLine.stream().reduce(SplitWise::joinString).get());
                 parseAndExecuteShowCommand(commandLine, userService, balanceService);
                 System.out.println();
             } else if (command.equalsIgnoreCase("EXPENSE")) {
                 parseAndExecuteExpenseCommand(commandLine, expenseService);
+            } else if (command.equalsIgnoreCase("PASSBOOK")) {
+                System.out.println(commandLine.stream().reduce(SplitWise::joinString).get());
+                parseAndExecutePassbookCommand(commandLine, expenseService, userService);
+                System.out.println();
+            } else {
+                System.out.println("Invalid Command: " + command);
+                System.out.println();
             }
         }
     }
@@ -120,18 +128,30 @@ public class SplitWise {
                     return;
                 }
             }
-        }
 
-        if (commandLine.size() > 5 + 2 * numUsers) {
-            name = commandLine.get(5 + 2 * numUsers);
-        }
+            if (commandLine.size() > 5 + 2 * numUsers) {
+                name = commandLine.get(5 + 2 * numUsers);
+            }
 
-        if (commandLine.size() > 6 + 2 * numUsers) {
-            note = commandLine.get(6 + 2 * numUsers);
-        }
+            if (commandLine.size() > 6 + 2 * numUsers) {
+                note = commandLine.get(6 + 2 * numUsers);
+            }
 
-        if (commandLine.size() > 7 + 2 * numUsers) {
-            imageUri = commandLine.get(7 + 2 * numUsers);
+            if (commandLine.size() > 7 + 2 * numUsers) {
+                imageUri = commandLine.get(7 + 2 * numUsers);
+            }
+        } else {
+            if (commandLine.size() > 5 + numUsers) {
+                name = commandLine.get(5 + numUsers);
+            }
+
+            if (commandLine.size() > 6 + numUsers) {
+                note = commandLine.get(6 + numUsers);
+            }
+
+            if (commandLine.size() > 7 + numUsers) {
+                imageUri = commandLine.get(7 + numUsers);
+            }
         }
 
         try {
@@ -161,6 +181,38 @@ public class SplitWise {
             } else {
                 System.out.printf("%s owes %s: %.2f\n", user.getName(), entry.getKey().getName(), -entry.getValue());
             }
+        }
+    }
+
+    private static void parseAndExecutePassbookCommand(List<String> commandLine, ExpenseService expenseService, UserService userService) {
+        try {
+            String userId = commandLine.get(1);
+            List<Expense> expenses = expenseService.getUserExpenses(userId);
+            User user = userService.findUser(userId);
+            for (Expense expense : expenses) {
+                printExpense(user, expense);
+            }
+        } catch (IllegalArgumentException ex) {
+            System.out.println(ex.getMessage());
+        } catch (IndexOutOfBoundsException ex) {
+            System.out.println("User id not present");
+        }
+    }
+
+    private static void printExpense(User user, Expense expense) {
+        if (expense.getName() != null && !expense.getName().isBlank()) {
+            System.out.println(expense.getName());
+        } else {
+            System.out.println("Expense #" + expense.getExpenseId().toString());
+        }
+        System.out.println("\tAmount: " + expense.getAmount());
+        double userOweAmount = ExpenseService.getUserOweAmountInExpense(expense, user.getUserId());
+        if (userOweAmount > 0) {
+            System.out.printf("\t%s is owed %.2f\n", user.getName(), userOweAmount);
+        } else if (userOweAmount < 0) {
+            System.out.printf("\t%s owes %.2f\n", user.getName(), -userOweAmount);
+        } else {
+            System.out.printf("\t%s does not participate in this expense", user.getName());
         }
     }
 }
